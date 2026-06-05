@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Noxus Copilot",
+  "version": "1.0.0",
+  "description": "Your Noxus agent as a copilot on any website — with native page context for Salesforce and HubSpot, and general context everywhere else.",
+  "permissions": ["storage", "identity"],
+  "host_permissions": ["https://*.auth0.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Noxus Copilot"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "adapters/salesforce.js",
+        "adapters/hubspot.js",
+        "adapters/generic.js",
+        "content.js"
+      ],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "toggle_panel": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K",
+        "mac": "Command+Shift+K"
+      },
+      "description": "Toggle the Noxus copilot panel"
+    }
+  }
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        width: 248px;
+        margin: 0;
+        padding: 14px;
+        color: #0f172a;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 12px;
+      }
+      .brand img { width: 22px; height: 22px; border-radius: 6px; }
+      .brand h1 { font-size: 14px; margin: 0; }
+      button {
+        display: block;
+        width: 100%;
+        margin-top: 8px;
+        padding: 9px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #fff;
+        font-size: 13px;
+        cursor: pointer;
+        text-align: left;
+      }
+      button:hover { background: #f1f5f9; }
+      #toggle { background: #0f172a; color: #fff; border-color: #0f172a; }
+      .section {
+        margin: 0 0 12px;
+        padding: 0 0 12px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .muted { font-size: 12px; color: #475569; margin: 0 0 2px; }
+      .strong { font-size: 12px; font-weight: 600; color: #0f172a; word-break: break-all; }
+      #login { background: #0f172a; color: #fff; border-color: #0f172a; }
+      .chip {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        color: #0f172a;
+        text-transform: capitalize;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="brand">
+      <img src="icons/icon48.png" alt="Noxus" />
+      <h1>Noxus Copilot</h1>
+    </div>
+
+    <div class="section">
+      <p class="muted" id="authStatus">Checking sign-in…</p>
+      <p class="strong" id="authEmail"></p>
+      <button id="login">Sign in to Noxus</button>
+      <button id="logout" style="display: none">Sign out</button>
+    </div>
+
+    <div class="section">
+      <p class="muted">On this page</p>
+      <p class="strong" id="contextStatus">…</p>
+    </div>
+
+    <button id="toggle">Toggle copilot panel</button>
+    <button id="options">Options…</button>
+    <script src="popup.js"></script>
+  </body>
+</html>
