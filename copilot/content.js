@@ -184,6 +184,7 @@
     const resizer = root.querySelector("#noxus-widget-resizer");
     let startX = 0;
     let startW = 0;
+    let mask = null;
 
     const onMove = (e) => {
       const delta = startX - e.clientX;
@@ -191,10 +192,15 @@
       settings.width = next;
       applyWidth(next);
     };
-    const onUp = () => {
+    const endDrag = () => {
       document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("mouseup", endDrag);
+      window.removeEventListener("blur", endDrag);
       document.body.style.userSelect = "";
+      if (mask) {
+        mask.remove();
+        mask = null;
+      }
       nudgeReflow();
       chrome.storage.sync.set({ width: settings.width });
     };
@@ -203,8 +209,15 @@
       startX = e.clientX;
       startW = settings.width;
       document.body.style.userSelect = "none";
+      // Full-window mask above the iframe: a cross-origin iframe captures the
+      // pointer once a fast drag crosses it, swallowing mousemove/mouseup so the
+      // drag never ends. The mask keeps every event in the top document.
+      mask = document.createElement("div");
+      mask.id = "noxus-widget-dragmask";
+      document.documentElement.appendChild(mask);
       document.addEventListener("mousemove", onMove);
-      document.addEventListener("mouseup", onUp);
+      document.addEventListener("mouseup", endDrag);
+      window.addEventListener("blur", endDrag);
     });
   }
 

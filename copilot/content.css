@@ -172,3 +172,12 @@ html:not(.noxus-widget-open) #noxus-widget-root {
   height: 100%;
   cursor: col-resize;
 }
+
+/* Transparent full-window layer shown only while dragging the resizer, so the
+   iframe can't capture the pointer mid-drag and strand the resize. */
+#noxus-widget-dragmask {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  cursor: col-resize;
+}
