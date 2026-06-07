@@ -1,9 +1,10 @@
 # Noxus Copilot (browser extension)
 
-Your Noxus agent as a copilot on **any** website. It docks as a resizable panel
-on the right, signs you in to Noxus, and sends the agent the **context of the
-page you're on** — natively for Salesforce and HubSpot, and a general page
-context (URL, title, headings, selected text) everywhere else.
+Turn a Noxus agent into a copilot that works in your browser and understands the
+platforms you're working in. It docks as a resizable panel, signs you in to
+Noxus, and sends the agent the **context of the page you're on**. It appears
+only on the sites you whitelist (prefilled with the CRMs it understands
+natively); add more in Options.
 
 ## Features
 

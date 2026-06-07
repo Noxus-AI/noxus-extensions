@@ -52,6 +52,11 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       contextEl.textContent = "Not available here";
       return;
     }
+    if (!res.allowed) {
+      contextEl.innerHTML =
+        'Off on this site — add it in <b>Options</b> to enable the copilot here.';
+      return;
+    }
     const label = SOURCE_LABELS[res.source] || "General page";
     const record = res.record
       ? ` · ${res.record.object}${res.record.id ? ` ${res.record.id}` : ""}`

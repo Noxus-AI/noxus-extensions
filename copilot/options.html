@@ -39,15 +39,35 @@
   <body>
     <h1>Noxus Copilot</h1>
     <p class="hint" style="margin-top: 4px">
-      Connect a Noxus agent to act as your copilot on any website. It detects
-      page context natively on Salesforce and HubSpot, and sends general page
-      context everywhere else.
+      Turn a Noxus agent into a copilot that works in your browser and
+      understands the platforms you're working in.
     </p>
 
     <label for="iframeUrl">Copilot agent embed URL</label>
     <input type="url" id="iframeUrl" placeholder="https://app.noxus.ai/public/chat_widget?deployment_id=..." />
     <div class="hint">
       Paste your agent's public chat-widget / deployment embed URL.
+    </div>
+
+    <label for="allowedSites">Show the copilot on these sites</label>
+    <textarea
+      id="allowedSites"
+      rows="4"
+      style="
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        box-sizing: border-box;
+        resize: vertical;
+      "
+      placeholder="*.salesforce.com&#10;*.hubspot.com"
+    ></textarea>
+    <div class="hint">
+      One host pattern per line. Use <code>*.</code> for subdomains (e.g.
+      <code>*.salesforce.com</code>). The copilot only loads on these sites.
     </div>
 
     <label for="title">Panel title</label>

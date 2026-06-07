@@ -8,7 +8,30 @@
     width: 400,
     open: false,
     title: "Noxus",
+    // Whitelist of host patterns where the copilot appears. Prefilled with the
+    // CRMs we understand natively; users add more in Options.
+    allowedSites: ["*.salesforce.com", "*.force.com", "*.hubspot.com"],
   };
+
+  function hostMatches(host, pattern) {
+    let p = String(pattern || "")
+      .trim()
+      .toLowerCase()
+      .replace(/^https?:\/\//, "")
+      .replace(/\/.*$/, "");
+    if (!p) return false;
+    const h = host.toLowerCase();
+    if (p.startsWith("*.")) {
+      const base = p.slice(2);
+      return h === base || h.endsWith("." + base);
+    }
+    return h === p;
+  }
+
+  function siteAllowed() {
+    const list = Array.isArray(settings.allowedSites) ? settings.allowedSites : [];
+    return list.some((p) => hostMatches(location.hostname, p));
+  }
 
   // Noxus "O" mark, inherits the header text colour.
   const NOXUS_LOGO = `<svg viewBox="0 0 17 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.92002 4.22578C1.65695 4.51301 0.188477 4.84695 0.188477 7.98515C0.188477 12.4879 2.67415 15.9664 7.30998 15.9664C11.9458 15.9664 16.602 11.5026 16.602 6.99986C16.602 2.49712 13.0313 0 8.39544 0C5.19009 0 4.9926 1.21862 4.81168 2.33492C4.73094 2.8331 4.65351 3.3109 4.3135 3.65091C3.97958 3.98483 3.46921 4.10089 2.92002 4.22578ZM10.7691 11.624C13.0563 10.1338 13.8488 7.29625 12.5391 5.28614C11.2295 3.27603 8.31364 2.85455 6.02643 4.34474C3.73923 5.83493 2.94677 8.67248 4.25643 10.6826C5.56608 12.6927 8.48191 13.1142 10.7691 11.624Z" fill="currentColor"/></svg>`;
@@ -460,9 +483,35 @@
     );
   }
 
+  function unmount() {
+    if (root) {
+      root.remove();
+      root = null;
+    }
+    if (handle) {
+      handle.remove();
+      handle = null;
+    }
+    iframeReady = false;
+    document.documentElement.classList.remove(
+      "noxus-widget-open",
+      "noxus-widget-mounted",
+      "noxus-widget-resizing"
+    );
+  }
+
+  // Mount only on whitelisted sites; react to the whitelist changing.
+  function maybeMount() {
+    if (siteAllowed()) {
+      if (!root) mount();
+    } else if (root) {
+      unmount();
+    }
+  }
+
   chrome.storage.sync.get(DEFAULTS, (stored) => {
     settings = { ...DEFAULTS, ...stored };
-    mount();
+    maybeMount();
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
@@ -470,14 +519,15 @@
     for (const [key, { newValue }] of Object.entries(changes)) {
       if (key in settings) settings[key] = newValue;
     }
-    render();
+    maybeMount();
+    if (root) render();
   });
 
   // Toolbar command / popup controls.
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (!msg) return;
     if (msg.type === "TOGGLE_PANEL") {
-      setOpen(!settings.open);
+      if (root) setOpen(!settings.open);
     } else if (msg.type === "GET_STATUS") {
       const ctx = getPageContext();
       sendResponse({
@@ -485,6 +535,7 @@
         record: ctx.record || null,
         open: settings.open,
         connected: !!settings.iframeUrl,
+        allowed: siteAllowed(),
       });
     }
   });

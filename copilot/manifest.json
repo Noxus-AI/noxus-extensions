@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Noxus Copilot",
   "version": "1.0.0",
-  "description": "Your Noxus agent as a copilot on any website — with native page context for Salesforce and HubSpot, and general context everywhere else.",
+  "description": "Turn a Noxus agent into a copilot that works in your browser and understands the platforms you're working in.",
   "permissions": ["storage", "identity"],
   "host_permissions": ["https://*/*"],
   "background": {

@@ -1,8 +1,11 @@
+const DEFAULT_ALLOWED_SITES = ["*.salesforce.com", "*.force.com", "*.hubspot.com"];
+
 const DEFAULTS = {
   iframeUrl: "",
   width: 400,
   title: "Noxus",
   noxusBaseUrl: "",
+  allowedSites: DEFAULT_ALLOWED_SITES,
 };
 
 const els = {
@@ -10,6 +13,7 @@ const els = {
   title: document.getElementById("title"),
   width: document.getElementById("width"),
   noxusBaseUrl: document.getElementById("noxusBaseUrl"),
+  allowedSites: document.getElementById("allowedSites"),
   status: document.getElementById("status"),
 };
 
@@ -18,6 +22,9 @@ chrome.storage.sync.get(DEFAULTS, (s) => {
   els.title.value = s.title || "Noxus";
   els.width.value = s.width || 400;
   els.noxusBaseUrl.value = s.noxusBaseUrl || "";
+  els.allowedSites.value = (
+    Array.isArray(s.allowedSites) ? s.allowedSites : DEFAULT_ALLOWED_SITES
+  ).join("\n");
 });
 
 document.getElementById("save").addEventListener("click", () => {
@@ -29,12 +36,17 @@ document.getElementById("save").addEventListener("click", () => {
 
 function saveSettings(done) {
   const width = Math.min(Math.max(parseInt(els.width.value, 10) || 400, 280), 900);
+  const allowedSites = els.allowedSites.value
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
   chrome.storage.sync.set(
     {
       iframeUrl: els.iframeUrl.value.trim(),
       title: els.title.value.trim() || "Noxus",
       width,
       noxusBaseUrl: els.noxusBaseUrl.value.trim().replace(/\/+$/, ""),
+      allowedSites: allowedSites.length ? allowedSites : DEFAULT_ALLOWED_SITES,
     },
     done
   );
