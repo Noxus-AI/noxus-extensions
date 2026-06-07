@@ -70,7 +70,28 @@
       Your Noxus app URL — the extension authorizes against it.
     </div>
 
-    <div>
+    <div
+      style="
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 14px;
+      "
+    >
+      <button id="signin" type="button" style="margin-top: 0">
+        Sign in to Noxus
+      </button>
+      <button
+        id="signout"
+        type="button"
+        style="margin-top: 0; display: none; background: #fff; color: #0f172a; border: 1px solid #cbd5e1"
+      >
+        Sign out
+      </button>
+      <span id="authStatus" class="hint"></span>
+    </div>
+
+    <div style="margin-top: 24px">
       <button id="save">Save</button>
       <span id="status"></span>
     </div>
