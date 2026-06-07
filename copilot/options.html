@@ -57,26 +57,18 @@
     <input type="number" id="width" min="280" max="900" step="10" />
     <div class="hint">You can also drag the left edge of the panel to resize.</div>
 
-    <h2 style="font-size:15px;margin:28px 0 4px">Authentication (Noxus user)</h2>
+    <h2 style="font-size:15px;margin:28px 0 4px">Sign in to Noxus</h2>
     <div class="hint" style="margin-bottom:8px">
-      Required only when the deployment uses <b>Noxus user</b> auth. Configure an
-      Auth0 application (SPA / native, Authorization Code + PKCE) with the
-      redirect URI below, then fill these in. Leave blank for public/anonymous
-      embeds.
+      Required only when the deployment uses <b>Noxus user</b> auth. Set your
+      Noxus base URL; you'll be sent there to authorize the extension and signed
+      in as yourself. Leave blank for public/anonymous embeds.
     </div>
 
-    <label>Extension redirect URI (add this to your Auth0 app's Allowed Callback URLs)</label>
-    <input type="text" id="redirectUri" readonly />
-
-    <label for="auth0Domain">Auth0 domain</label>
-    <input type="text" id="auth0Domain" placeholder="your-tenant.eu.auth0.com" />
-
-    <label for="auth0ClientId">Auth0 client ID</label>
-    <input type="text" id="auth0ClientId" placeholder="abc123..." />
-
-    <label for="auth0Audience">API audience</label>
-    <input type="text" id="auth0Audience" placeholder="https://api.noxus.ai" />
-    <div class="hint">The Noxus API audience the access token is issued for.</div>
+    <label for="noxusBaseUrl">Noxus base URL</label>
+    <input type="url" id="noxusBaseUrl" placeholder="https://app.noxus.ai" />
+    <div class="hint">
+      Your Noxus app URL — the extension authorizes against it.
+    </div>
 
     <div>
       <button id="save">Save</button>

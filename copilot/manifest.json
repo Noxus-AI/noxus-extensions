@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Your Noxus agent as a copilot on any website — with native page context for Salesforce and HubSpot, and general context everywhere else.",
   "permissions": ["storage", "identity"],
-  "host_permissions": ["https://*.auth0.com/*"],
+  "host_permissions": ["https://*/*"],
   "background": {
     "service_worker": "background.js"
   },

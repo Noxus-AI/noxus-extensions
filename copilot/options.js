@@ -2,31 +2,22 @@ const DEFAULTS = {
   iframeUrl: "",
   width: 400,
   title: "Noxus",
-  auth0Domain: "",
-  auth0ClientId: "",
-  auth0Audience: "",
+  noxusBaseUrl: "",
 };
 
 const els = {
   iframeUrl: document.getElementById("iframeUrl"),
   title: document.getElementById("title"),
   width: document.getElementById("width"),
-  auth0Domain: document.getElementById("auth0Domain"),
-  auth0ClientId: document.getElementById("auth0ClientId"),
-  auth0Audience: document.getElementById("auth0Audience"),
-  redirectUri: document.getElementById("redirectUri"),
+  noxusBaseUrl: document.getElementById("noxusBaseUrl"),
   status: document.getElementById("status"),
 };
-
-els.redirectUri.value = chrome.identity.getRedirectURL();
 
 chrome.storage.sync.get(DEFAULTS, (s) => {
   els.iframeUrl.value = s.iframeUrl || "";
   els.title.value = s.title || "Noxus";
   els.width.value = s.width || 400;
-  els.auth0Domain.value = s.auth0Domain || "";
-  els.auth0ClientId.value = s.auth0ClientId || "";
-  els.auth0Audience.value = s.auth0Audience || "";
+  els.noxusBaseUrl.value = s.noxusBaseUrl || "";
 });
 
 document.getElementById("save").addEventListener("click", () => {
@@ -36,9 +27,7 @@ document.getElementById("save").addEventListener("click", () => {
       iframeUrl: els.iframeUrl.value.trim(),
       title: els.title.value.trim() || "Noxus",
       width,
-      auth0Domain: els.auth0Domain.value.trim().replace(/^https?:\/\//, ""),
-      auth0ClientId: els.auth0ClientId.value.trim(),
-      auth0Audience: els.auth0Audience.value.trim(),
+      noxusBaseUrl: els.noxusBaseUrl.value.trim().replace(/\/+$/, ""),
     },
     () => {
       els.status.textContent = "Saved ✓";

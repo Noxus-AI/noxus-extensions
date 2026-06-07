@@ -1,13 +1,11 @@
-// Auth0 PKCE login for the extension. The extension never holds a signing
-// secret — it logs the user into Noxus via Auth0 (Authorization Code + PKCE)
-// and relays the resulting access token to the widget iframe, which sends it
-// as `Authorization: Bearer` so the agent runs as the real Noxus user.
+// Noxus-authorizer login. The user configures only their Noxus base URL; the
+// extension sends them to `{base}/extension/authorize` to consent, exchanges
+// the returned one-time code (PKCE) for a Noxus-issued access + refresh JWT at
+// `{base}/api/public/extension/token`, and relays the access token to the
+// widget — which sends it as `Authorization: Bearer` so the agent runs as the
+// real Noxus user. No Auth0 config in the extension.
 
-const AUTH_CONFIG_DEFAULTS = {
-  auth0Domain: "",
-  auth0ClientId: "",
-  auth0Audience: "",
-};
+const CONFIG_DEFAULTS = { noxusBaseUrl: "" };
 
 const REDIRECT_URI = chrome.identity.getRedirectURL();
 // Refresh a little early so a token handed to the widget isn't about to expire.
@@ -34,9 +32,11 @@ function randomToken() {
 }
 
 function getConfig() {
-  return new Promise((resolve) =>
-    chrome.storage.sync.get(AUTH_CONFIG_DEFAULTS, resolve)
-  );
+  return new Promise((resolve) => chrome.storage.sync.get(CONFIG_DEFAULTS, resolve));
+}
+
+function baseUrl(cfg) {
+  return (cfg.noxusBaseUrl || "").trim().replace(/\/+$/, "");
 }
 
 function getStoredAuth() {
@@ -45,18 +45,18 @@ function getStoredAuth() {
   );
 }
 
-async function tokenRequest(cfg, params) {
-  const res = await fetch(`https://${cfg.auth0Domain}/oauth/token`, {
+async function tokenRequest(base, body) {
+  const res = await fetch(`${base}/api/public/extension/token`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ client_id: cfg.auth0ClientId, ...params }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
     let detail = "";
     try {
-      detail = (await res.json()).error_description || "";
+      detail = (await res.json()).detail || "";
     } catch (e) {
-      // non-JSON body — fall back to status text
+      // non-JSON body
     }
     throw new Error(`Token endpoint ${res.status} ${detail}`.trim());
   }
@@ -67,44 +67,27 @@ async function storeTokens(tokens) {
   const prev = (await getStoredAuth()) || {};
   const auth = {
     accessToken: tokens.access_token,
-    // Auth0 omits refresh_token on refresh-grant responses; keep the old one.
     refreshToken: tokens.refresh_token || prev.refreshToken || null,
-    idToken: tokens.id_token || prev.idToken || null,
     expiresAt: Date.now() + (tokens.expires_in || 3600) * 1000,
   };
   await chrome.storage.local.set({ auth });
   return auth;
 }
 
-function decodeEmail(idToken) {
-  if (!idToken) return null;
-  try {
-    const payload = idToken.split(".")[1];
-    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
-    return JSON.parse(json).email || null;
-  } catch (e) {
-    return null;
-  }
-}
-
 async function login() {
   const cfg = await getConfig();
-  if (!cfg.auth0Domain || !cfg.auth0ClientId) {
-    throw new Error("Auth0 is not configured — set it in the extension Options.");
+  const base = baseUrl(cfg);
+  if (!base) {
+    throw new Error("Set your Noxus base URL in the extension Options first.");
   }
 
   const verifier = randomToken();
   const challenge = base64UrlEncode(await sha256(verifier));
   const state = randomToken();
 
-  const authUrl = new URL(`https://${cfg.auth0Domain}/authorize`);
-  authUrl.searchParams.set("response_type", "code");
-  authUrl.searchParams.set("client_id", cfg.auth0ClientId);
+  const authUrl = new URL(`${base}/extension/authorize`);
   authUrl.searchParams.set("redirect_uri", REDIRECT_URI);
-  authUrl.searchParams.set("scope", "openid profile email offline_access");
-  if (cfg.auth0Audience) authUrl.searchParams.set("audience", cfg.auth0Audience);
   authUrl.searchParams.set("code_challenge", challenge);
-  authUrl.searchParams.set("code_challenge_method", "S256");
   authUrl.searchParams.set("state", state);
 
   const redirect = await chrome.identity.launchWebAuthFlow({
@@ -118,15 +101,14 @@ async function login() {
   const code = returned.searchParams.get("code");
   if (!code) {
     throw new Error(
-      returned.searchParams.get("error_description") || "Login was cancelled."
+      returned.searchParams.get("error") || "Authorization was cancelled."
     );
   }
 
-  const tokens = await tokenRequest(cfg, {
+  const tokens = await tokenRequest(base, {
     grant_type: "authorization_code",
     code,
     code_verifier: verifier,
-    redirect_uri: REDIRECT_URI,
   });
   await storeTokens(tokens);
   return status();
@@ -134,16 +116,12 @@ async function login() {
 
 async function logout() {
   await chrome.storage.local.remove("auth");
-  return { authenticated: false, email: null };
+  return { authenticated: false };
 }
 
 async function status() {
   const auth = await getStoredAuth();
-  return {
-    authenticated: !!(auth && auth.accessToken),
-    email: auth ? decodeEmail(auth.idToken) : null,
-    expiresAt: auth ? auth.expiresAt : null,
-  };
+  return { authenticated: !!(auth && auth.accessToken) };
 }
 
 async function getAccessToken() {
@@ -153,12 +131,14 @@ async function getAccessToken() {
   if (!auth.refreshToken) return null;
   try {
     const cfg = await getConfig();
-    const tokens = await tokenRequest(cfg, {
+    const tokens = await tokenRequest(baseUrl(cfg), {
       grant_type: "refresh_token",
       refresh_token: auth.refreshToken,
     });
     return (await storeTokens(tokens)).accessToken;
   } catch (e) {
+    // Refresh failed (revoked / expired) — drop the stale session.
+    await chrome.storage.local.remove("auth");
     return null;
   }
 }
