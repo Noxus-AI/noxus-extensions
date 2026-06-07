@@ -257,8 +257,11 @@
 
   let reflowTimer = null;
   function nudgeReflow() {
+    // Fire mid- and post-slide so JS-measured host components (Salesforce data
+    // tables, etc.) re-layout to the final width after the 320ms animation.
     clearTimeout(reflowTimer);
     reflowTimer = setTimeout(() => window.dispatchEvent(new Event("resize")), 60);
+    setTimeout(() => window.dispatchEvent(new Event("resize")), 360);
   }
 
   function buildIframeSrc() {
@@ -316,6 +319,8 @@
       document.removeEventListener("mouseup", endDrag);
       window.removeEventListener("blur", endDrag);
       document.body.style.userSelect = "";
+      // Re-enable the slide/reflow transition now the drag is done.
+      document.documentElement.classList.remove("noxus-widget-resizing");
       if (mask) {
         mask.remove();
         mask = null;
@@ -328,6 +333,9 @@
       startX = e.clientX;
       startW = settings.width;
       document.body.style.userSelect = "none";
+      // The width transition would make the panel lag behind the cursor; turn
+      // it off for the duration of the drag.
+      document.documentElement.classList.add("noxus-widget-resizing");
       // Full-window mask above the iframe: a cross-origin iframe captures the
       // pointer once a fast drag crosses it, swallowing mousemove/mouseup so the
       // drag never ends. The mask keeps every event in the top document.
@@ -376,9 +384,10 @@
         </div>
       </div>
       <div class="noxus-widget-empty">
-        No copilot agent connected.<br>
-        Click the Noxus icon in your toolbar &rarr; <b>Options</b> to paste your
-        agent's embed URL.
+        <span class="noxus-empty-logo">${NOXUS_LOGO}</span>
+        <p class="noxus-empty-title">Connect your copilot</p>
+        <p class="noxus-empty-text">Add your Noxus agent's embed URL to start using it on any page.</p>
+        <button class="noxus-empty-btn" type="button">Open options</button>
       </div>
       <div class="noxus-widget-signin noxus-hidden">
         <p>Sign in with your Noxus account to use this agent.</p>
@@ -399,6 +408,9 @@
     );
     handle.addEventListener("click", () => setOpen(true));
     root.querySelector(".noxus-signin-btn").addEventListener("click", signIn);
+    root.querySelector(".noxus-empty-btn").addEventListener("click", () => {
+      chrome.runtime.sendMessage({ type: "OPEN_OPTIONS" });
+    });
     root.querySelector(".noxus-external").addEventListener("click", openExternal);
     root.querySelector(".noxus-reload").addEventListener("click", reloadIframe);
     root.querySelector(".noxus-error-retry").addEventListener("click", reloadIframe);
@@ -438,6 +450,14 @@
     makeResizer();
     watchNavigation();
     render();
+
+    // Enable slide transitions only after the initial paint, so the panel
+    // appears in its persisted state without animating on every page load.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        document.documentElement.classList.add("noxus-widget-mounted")
+      )
+    );
   }
 
   chrome.storage.sync.get(DEFAULTS, (stored) => {

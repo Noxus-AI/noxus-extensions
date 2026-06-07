@@ -168,6 +168,10 @@ const HANDLERS = {
   AUTH_LOGOUT: logout,
   AUTH_STATUS: status,
   AUTH_GET_TOKEN: async () => ({ token: await getAccessToken() }),
+  OPEN_OPTIONS: async () => {
+    await chrome.runtime.openOptionsPage();
+    return {};
+  },
 };
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {

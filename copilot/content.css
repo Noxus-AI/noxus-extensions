@@ -39,18 +39,32 @@ html:not(.noxus-widget-open) #noxus-widget-root {
   display: none;
 }
 
+/* Slide the panel in/out and reflow the page in sync — enabled only after the
+   first paint (noxus-widget-mounted) so it doesn't animate on page load, and
+   suspended during a resize drag so the panel tracks the cursor 1:1. */
+html.noxus-widget-mounted #noxus-widget-root {
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+html.noxus-widget-mounted body {
+  transition: margin-right 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+html.noxus-widget-resizing #noxus-widget-root,
+html.noxus-widget-resizing body {
+  transition: none !important;
+}
+
 .noxus-widget-header {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 0 8px;
   height: 44px;
-  background: linear-gradient(180deg, #14223b 0%, #0f172a 100%);
+  background: #0b0b0c;
   color: #fff;
   font-size: 13px;
   font-weight: 600;
   flex: 0 0 auto;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .noxus-widget-header .noxus-logo {
@@ -251,9 +265,9 @@ html:not(.noxus-widget-open) #noxus-widget-root {
 }
 
 .noxus-error-actions .noxus-error-open {
-  background: #0f172a;
+  background: #0b0b0c;
   color: #fff;
-  border-color: #0f172a;
+  border-color: #0b0b0c;
 }
 
 .noxus-error-actions button:hover {
@@ -263,13 +277,61 @@ html:not(.noxus-widget-open) #noxus-widget-root {
 .noxus-widget-empty {
   flex: 1 1 auto;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
+  gap: 10px;
   padding: 24px;
   color: #64748b;
   font-size: 13px;
   line-height: 1.5;
+}
+
+.noxus-empty-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b0b0c;
+  margin-bottom: 2px;
+}
+
+.noxus-empty-logo svg {
+  width: 26px;
+  height: 26px;
+}
+
+.noxus-empty-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.noxus-empty-text {
+  margin: 0;
+  max-width: 240px;
+  color: #64748b;
+}
+
+.noxus-empty-btn {
+  margin-top: 4px;
+  background: #0b0b0c;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.noxus-empty-btn:hover {
+  background: #26262a;
 }
 
 .noxus-widget-signin {
@@ -293,7 +355,7 @@ html:not(.noxus-widget-open) #noxus-widget-root {
 }
 
 .noxus-signin-btn {
-  background: #0f172a;
+  background: #0b0b0c;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -304,7 +366,7 @@ html:not(.noxus-widget-open) #noxus-widget-root {
 }
 
 .noxus-signin-btn:hover {
-  background: #1e293b;
+  background: #26262a;
 }
 
 .noxus-signin-btn:disabled {
@@ -326,7 +388,7 @@ html:not(.noxus-widget-open) #noxus-widget-root {
   right: 0;
   transform: translateY(-50%);
   z-index: 2147483646;
-  background: linear-gradient(180deg, #14223b 0%, #0f172a 100%);
+  background: #0b0b0c;
   color: #fff;
   border: none;
   border-radius: 9px 0 0 9px;
@@ -339,11 +401,14 @@ html:not(.noxus-widget-open) #noxus-widget-root {
   align-items: center;
   gap: 6px;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.18);
-  transition: background-color 0.12s;
+  transition:
+    background-color 0.12s,
+    padding-right 0.12s;
 }
 
 #noxus-widget-handle:hover {
-  background: #1e293b;
+  background: #26262a;
+  padding-right: 10px;
 }
 
 #noxus-widget-handle span {
