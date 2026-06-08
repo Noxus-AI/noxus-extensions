@@ -104,6 +104,10 @@ html.noxus-widget-resizing body {
   color: #fff;
 }
 
+.noxus-widget-header .noxus-options {
+  font-size: 19px;
+}
+
 /* Page-context bar between the header and the chat. */
 .noxus-context-bar {
   flex: 0 0 auto;
