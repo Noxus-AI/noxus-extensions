@@ -74,6 +74,51 @@ async function storeTokens(tokens) {
   return auth;
 }
 
+// Open the authorize page in a normal browser tab and resolve with the
+// chromiumapp.org redirect URL once it fires. We can't use
+// chrome.identity.launchWebAuthFlow: recent Chrome runs it in an isolated
+// cookie partition where the user's Noxus/Auth0 session isn't visible and
+// Auth0's Universal Login fails to load ("Authorization page could not be
+// loaded"). A normal tab shares the session, so a signed-in user consents in
+// one click; we intercept the redirect before it tries to load.
+function authorizeInTab(url) {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.create({ url }, (tab) => {
+      const tabId = tab.id;
+      let settled = false;
+      // Catch the redirect via webRequest (fires for server-redirect targets,
+      // which webNavigation.onBeforeNavigate misses). chromiumapp.org doesn't
+      // resolve, so the request never actually loads — we just read its URL.
+      const filter = { urls: [`${REDIRECT_URI}*`], types: ["main_frame"] };
+
+      const cleanup = () => {
+        chrome.webRequest.onBeforeRequest.removeListener(onRequest);
+        chrome.tabs.onRemoved.removeListener(onClosed);
+      };
+      const finish = (fn, arg) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        fn(arg);
+      };
+
+      const onRequest = (details) => {
+        if (details.tabId !== tabId) return;
+        chrome.tabs.remove(tabId, () => void chrome.runtime.lastError);
+        finish(resolve, details.url);
+      };
+      const onClosed = (closedId) => {
+        if (closedId === tabId) {
+          finish(reject, new Error("Authorization was cancelled."));
+        }
+      };
+
+      chrome.webRequest.onBeforeRequest.addListener(onRequest, filter);
+      chrome.tabs.onRemoved.addListener(onClosed);
+    });
+  });
+}
+
 async function login() {
   const cfg = await getConfig();
   const base = baseUrl(cfg);
@@ -90,11 +135,8 @@ async function login() {
   authUrl.searchParams.set("code_challenge", challenge);
   authUrl.searchParams.set("state", state);
 
-  const redirect = await chrome.identity.launchWebAuthFlow({
-    url: authUrl.toString(),
-    interactive: true,
-  });
-  const returned = new URL(redirect);
+  const returned = new URL(await authorizeInTab(authUrl.toString()));
+  console.log("[noxus] redirect caught:", returned.toString());
   if (returned.searchParams.get("state") !== state) {
     throw new Error("Auth state mismatch — aborting.");
   }
@@ -105,12 +147,14 @@ async function login() {
     );
   }
 
+  console.log("[noxus] exchanging code for tokens…");
   const tokens = await tokenRequest(base, {
     grant_type: "authorization_code",
     code,
     code_verifier: verifier,
   });
   await storeTokens(tokens);
+  console.log("[noxus] tokens stored — connected.");
   return status();
 }
 
@@ -159,7 +203,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (!handler) return false;
   handler()
     .then((result) => sendResponse({ ok: true, ...result }))
-    .catch((e) => sendResponse({ ok: false, error: String((e && e.message) || e) }));
+    .catch((e) => {
+      console.error("[noxus] handler error:", msg.type, e);
+      sendResponse({ ok: false, error: String((e && e.message) || e) });
+    });
   return true; // keep the message channel open for the async response
 });
 

@@ -3,7 +3,7 @@
   "name": "Noxus Copilot",
   "version": "1.0.0",
   "description": "Turn a Noxus agent into a copilot that works in your browser and understands the platforms you're working in.",
-  "permissions": ["storage", "identity"],
+  "permissions": ["storage", "identity", "tabs", "webRequest"],
   "host_permissions": ["https://*/*"],
   "background": {
     "service_worker": "background.js"

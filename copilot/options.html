@@ -24,6 +24,7 @@
       input[type="text"],
       input[type="url"],
       input[type="number"],
+      select,
       textarea {
         width: 100%;
         padding: 8px 10px;
@@ -31,6 +32,20 @@
         border-radius: 6px;
         font-size: 13px;
         box-sizing: border-box;
+        background: #fff;
+      }
+      select:disabled {
+        background: #f1f5f9;
+        color: #94a3b8;
+      }
+      details.advanced {
+        margin-top: 18px;
+      }
+      details.advanced summary {
+        cursor: pointer;
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 8px;
       }
       textarea {
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -72,7 +87,33 @@
       }
       .auth-card h2 {
         font-size: 15px;
-        margin: 0 0 4px;
+        margin: 0;
+      }
+      .auth-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4px;
+      }
+      .icon-btn {
+        background: transparent;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        padding: 4px;
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .icon-btn:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      #baseUrlRow[hidden] {
+        display: none;
       }
       .auth-row {
         display: flex;
@@ -109,14 +150,42 @@
 
     <!-- Sign-in call to action (top) -->
     <div class="auth-card">
-      <h2>Sign in to Noxus</h2>
+      <div class="auth-card-head">
+        <h2>Sign in to Noxus</h2>
+        <button
+          id="toggleBaseUrl"
+          class="icon-btn"
+          type="button"
+          title="Noxus base URL"
+          aria-label="Noxus base URL"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+            ></path>
+          </svg>
+        </button>
+      </div>
       <div class="hint">
         Connect the extension to your Noxus account so the copilot acts as you.
         You'll be sent to your Noxus app to authorize it.
       </div>
 
-      <label for="noxusBaseUrl">Noxus base URL</label>
-      <input type="url" id="noxusBaseUrl" placeholder="https://app.noxus.ai" />
+      <div id="baseUrlRow" hidden>
+        <label for="noxusBaseUrl">Noxus base URL</label>
+        <input type="url" id="noxusBaseUrl" placeholder="https://app.noxus.ai" />
+      </div>
 
       <div class="auth-row">
         <button id="signin" type="button">Sign in to Noxus</button>
@@ -127,15 +196,28 @@
       </div>
     </div>
 
-    <label for="iframeUrl">Copilot agent embed URL</label>
-    <input
-      type="url"
-      id="iframeUrl"
-      placeholder="https://app.noxus.ai/public/chat_widget?deployment_id=..."
-    />
-    <div class="hint">
-      Paste your agent's public chat-widget / deployment embed URL.
-    </div>
+    <label for="workspace">Workspace</label>
+    <select id="workspace" disabled>
+      <option value="">Sign in to choose…</option>
+    </select>
+
+    <label for="agent">Agent</label>
+    <select id="agent" disabled>
+      <option value="">Select a workspace first…</option>
+    </select>
+    <div class="hint" id="pickerHint"></div>
+
+    <details class="advanced">
+      <summary>Advanced: paste an embed URL manually</summary>
+      <input
+        type="url"
+        id="iframeUrl"
+        placeholder="https://app.noxus.ai/public/chat_widget?deployment_id=..."
+      />
+      <div class="hint">
+        Overrides the picker. Use your agent's public chat-widget embed URL.
+      </div>
+    </details>
 
     <label for="allowedSites">Show the copilot on these sites</label>
     <textarea

@@ -381,6 +381,7 @@
       <div class="noxus-widget-header">
         <span class="noxus-logo">${NOXUS_LOGO}</span>
         <span class="noxus-title">Noxus</span>
+        <button class="noxus-options" title="Options">&#x2699;&#xFE0E;</button>
         <button class="noxus-external" title="Open in a new tab">&#x2197;</button>
         <button class="noxus-reload" title="Reload">&#x21bb;</button>
         <button class="noxus-collapse" title="Collapse">&times;</button>
@@ -432,6 +433,9 @@
     handle.addEventListener("click", () => setOpen(true));
     root.querySelector(".noxus-signin-btn").addEventListener("click", signIn);
     root.querySelector(".noxus-empty-btn").addEventListener("click", () => {
+      chrome.runtime.sendMessage({ type: "OPEN_OPTIONS" });
+    });
+    root.querySelector(".noxus-options").addEventListener("click", () => {
       chrome.runtime.sendMessage({ type: "OPEN_OPTIONS" });
     });
     root.querySelector(".noxus-external").addEventListener("click", openExternal);
