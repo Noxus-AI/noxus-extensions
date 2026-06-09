@@ -6,14 +6,16 @@ Browser extensions for the Noxus platform.
 
 ### [`copilot/`](./copilot) — Noxus Copilot
 
-Your Noxus agent as a copilot on **any** website. Docks as a resizable panel,
-signs you in to your Noxus instance (PKCE), and sends the agent the **context
-of the page you're on** — natively for Salesforce and HubSpot, general page
-context everywhere else.
+Your Noxus agent as a copilot on **any** website. A Manifest V3 Chrome
+extension that docks as a resizable panel, signs you in to your own Noxus
+instance (OAuth + PKCE), and sends the agent the **context of the page you're
+on** — natively for Salesforce and HubSpot, general page context everywhere
+else. It only activates on sites you whitelist, and page context is sent only
+to the Noxus instance you configure.
 
 Load it unpacked from `copilot/` (`chrome://extensions` → Developer mode →
-Load unpacked). See [`copilot/README.md`](./copilot/README.md) for setup and
-how to add a new native site integration.
+Load unpacked). See [`copilot/README.md`](./copilot/README.md) for setup, the
+privacy/permissions details, and how to add a new native site integration.
 
 ## Layout
 
