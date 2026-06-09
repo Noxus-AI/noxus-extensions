@@ -1,7 +1,7 @@
 // Noxus-authorizer login. The user configures only their Noxus base URL; the
-// extension sends them to `{base}/extension/authorize` to consent, exchanges
+// extension sends them to `{base}/clients/authorize` to consent, exchanges
 // the returned one-time code (PKCE) for a Noxus-issued access + refresh JWT at
-// `{base}/api/public/extension/token`, and relays the access token to the
+// `{base}/api/public/clients/token`, and relays the access token to the
 // widget — which sends it as `Authorization: Bearer` so the agent runs as the
 // real Noxus user. No Auth0 config in the extension.
 
@@ -46,7 +46,7 @@ function getStoredAuth() {
 }
 
 async function tokenRequest(base, body) {
-  const res = await fetch(`${base}/api/public/extension/token`, {
+  const res = await fetch(`${base}/api/public/clients/token`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -130,7 +130,7 @@ async function login() {
   const challenge = base64UrlEncode(await sha256(verifier));
   const state = randomToken();
 
-  const authUrl = new URL(`${base}/extension/authorize`);
+  const authUrl = new URL(`${base}/clients/authorize`);
   authUrl.searchParams.set("redirect_uri", REDIRECT_URI);
   authUrl.searchParams.set("code_challenge", challenge);
   authUrl.searchParams.set("state", state);
