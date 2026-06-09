@@ -136,7 +136,6 @@ async function login() {
   authUrl.searchParams.set("state", state);
 
   const returned = new URL(await authorizeInTab(authUrl.toString()));
-  console.log("[noxus] redirect caught:", returned.toString());
   if (returned.searchParams.get("state") !== state) {
     throw new Error("Auth state mismatch — aborting.");
   }
@@ -147,14 +146,12 @@ async function login() {
     );
   }
 
-  console.log("[noxus] exchanging code for tokens…");
   const tokens = await tokenRequest(base, {
     grant_type: "authorization_code",
     code,
     code_verifier: verifier,
   });
   await storeTokens(tokens);
-  console.log("[noxus] tokens stored — connected.");
   return status();
 }
 

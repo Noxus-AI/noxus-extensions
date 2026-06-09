@@ -14,16 +14,18 @@ natively); add more in Options.
   - **Salesforce** — object type + record id from Lightning (cases, records, list views).
   - **HubSpot** — object type + record id from the CRM (contacts, companies, deals, tickets).
   - **Generic** — URL, title, page heading, meta description, current text selection.
-- **Real Noxus identity** — Auth0 (Authorization Code + PKCE) login in the
-  extension; the agent runs as the real you (used by the deployment's
-  `noxus_user` auth mode).
+- **Real Noxus identity** — sign in against your own Noxus instance
+  (Authorization Code + PKCE) from inside the extension; the agent runs as the
+  real you (used by the deployment's `noxus_user` auth mode).
 
 ## Install (unpacked)
 
 1. `chrome://extensions` → enable **Developer mode** → **Load unpacked** → select this folder.
-2. Click the Noxus icon → **Options…**, paste your agent's embed URL (and, for
-   authenticated agents, your Auth0 domain / client id / audience), Save.
-3. Click the Noxus icon → **Sign in to Noxus** (only needed for `noxus_user` agents).
+2. Click the Noxus icon → **Options…**, set your **Noxus base URL** (e.g.
+   `https://app.noxus.ai`), **Sign in to Noxus**, then pick a workspace and
+   agent (or paste an embed URL under **Advanced**), Save.
+3. Sign-in is only needed for `noxus_user` agents; it's also available from the
+   toolbar popup and the in-panel prompt.
 4. Open any page → use the toolbar toggle or `Ctrl/Cmd+Shift+K` to open the panel.
 
 ## How context flows
@@ -66,12 +68,12 @@ window.__noxusAdapters.push({
 
 ## Files
 
-- `manifest.json` — MV3, `<all_urls>` content script, Auth0 host permission, toggle command
+- `manifest.json` — MV3, `<all_urls>` content script, `https://*/*` host permission, toggle command
 - `content.js` — panel injection, adapter dispatch, postMessage handshake, SPA nav watch
 - `adapters/{salesforce,hubspot,generic}.js` — per-site context extraction
-- `background.js` — Auth0 PKCE login + token storage/refresh, toggle command
+- `background.js` — Noxus PKCE login + token storage/refresh, toggle command
 - `popup.html/js` — sign-in, detected-context indicator, panel toggle
-- `options.html/js` — agent embed URL, panel title/width, Auth0 config
+- `options.html/js` — Noxus base URL, workspace/agent picker, whitelist, panel title/width
 - `icons/` — Noxus "O" mark
 
 ## Notes
