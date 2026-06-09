@@ -8,6 +8,8 @@
     width: 400,
     open: false,
     title: "Noxus",
+    // Show the page-context bar (source + record) above the chat.
+    showPageInfo: true,
     // Whitelist of host patterns where the copilot appears. Prefilled with the
     // CRMs we understand natively; users add more in Options.
     allowedSites: ["*.salesforce.com", "*.force.com", "*.hubspot.com"],
@@ -35,6 +37,26 @@
 
   // Noxus "O" mark, inherits the header text colour.
   const NOXUS_LOGO = `<svg viewBox="0 0 17 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.92002 4.22578C1.65695 4.51301 0.188477 4.84695 0.188477 7.98515C0.188477 12.4879 2.67415 15.9664 7.30998 15.9664C11.9458 15.9664 16.602 11.5026 16.602 6.99986C16.602 2.49712 13.0313 0 8.39544 0C5.19009 0 4.9926 1.21862 4.81168 2.33492C4.73094 2.8331 4.65351 3.3109 4.3135 3.65091C3.97958 3.98483 3.46921 4.10089 2.92002 4.22578ZM10.7691 11.624C13.0563 10.1338 13.8488 7.29625 12.5391 5.28614C11.2295 3.27603 8.31364 2.85455 6.02643 4.34474C3.73923 5.83493 2.94677 8.67248 4.25643 10.6826C5.56608 12.6927 8.48191 13.1142 10.7691 11.624Z" fill="currentColor"/></svg>`;
+
+  // Full "Noxus" wordmark (the "O" is the brand mark); inherits header colour.
+  const NOXUS_WORDMARK = `<svg viewBox="0 0 75 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0 15.6596V0.340426H3.14894L10.8936 10.4468V0.340426H14.2979V15.6596H11.1064L3.40425 5.6383V15.6596H0Z" fill="currentColor"/><path d="M31.8692 15.6596L37.6777 7.6383L32.6564 0.340426H36.4436L39.5713 5.10638L42.699 0.340426H46.4862L41.4649 7.6383L47.2734 15.6596H43.1883L39.5713 10.3191L35.9543 15.6596H31.8692Z" fill="currentColor"/><path d="M51.6273 0.340426V9.53191C51.6273 10 51.7053 10.4397 51.8614 10.8511C52.0174 11.2624 52.2372 11.6241 52.5209 11.9362C52.8046 12.2482 53.138 12.4965 53.5209 12.6809C53.9039 12.8511 54.3294 12.9362 54.7975 12.9362C55.2656 12.9362 55.6912 12.8511 56.0741 12.6809C56.4571 12.4965 56.7904 12.2482 57.0741 11.9362C57.3578 11.6241 57.5777 11.2624 57.7337 10.8511C57.8897 10.4397 57.9677 10 57.9677 9.53191V0.340426H61.372V9.74468C61.372 10.6383 61.2018 11.4681 60.8614 12.234C60.5351 13 60.0741 13.6596 59.4784 14.2128C58.8968 14.766 58.2018 15.2057 57.3933 15.5319C56.599 15.844 55.7337 16 54.7975 16C53.8614 16 52.989 15.844 52.1805 15.5319C51.3862 15.2057 50.6912 14.766 50.0954 14.2128C49.5138 13.6596 49.0528 13 48.7124 12.234C48.3862 11.4681 48.2231 10.6383 48.2231 9.74468V0.340426H51.6273Z" fill="currentColor"/><path d="M70.5211 6.68085C71.0459 6.78014 71.5495 6.94326 72.0317 7.17021C72.5282 7.38298 72.9679 7.66667 73.3509 8.02128C73.7339 8.37589 74.0388 8.79433 74.2658 9.2766C74.5069 9.74468 74.6275 10.2837 74.6275 10.8936C74.6275 11.6312 74.4856 12.3121 74.202 12.9362C73.9324 13.5603 73.5424 14.0993 73.0317 14.5532C72.5211 15.0071 71.897 15.3617 71.1594 15.617C70.436 15.8723 69.6204 16 68.7126 16C67.8899 16 67.1239 15.8582 66.4147 15.5745C65.7055 15.2766 65.0885 14.8794 64.5637 14.383C64.053 13.8865 63.6488 13.3121 63.3509 12.6596C63.0672 12.0071 62.9254 11.3191 62.9254 10.5957H66.2445C66.3154 11.2624 66.5707 11.8227 67.0105 12.2766C67.4644 12.7163 68.0317 12.9362 68.7126 12.9362C69.5069 12.9362 70.1381 12.7589 70.6062 12.4043C71.0885 12.0496 71.3296 11.5461 71.3296 10.8936C71.3296 10.5674 71.2445 10.305 71.0743 10.1064C70.9183 9.89362 70.6842 9.70922 70.3722 9.55319C70.0601 9.39716 69.6771 9.26241 69.2232 9.14894C68.7835 9.02128 68.28 8.89362 67.7126 8.76596C67.0885 8.62411 66.4998 8.43972 65.9466 8.21277C65.3934 7.98582 64.9041 7.70922 64.4785 7.38298C64.0672 7.05674 63.741 6.68085 63.4998 6.25532C63.2587 5.82979 63.1381 5.34043 63.1381 4.78723C63.1381 4.07801 63.2658 3.43262 63.5211 2.85106C63.7906 2.2695 64.1665 1.76596 64.6488 1.34043C65.131 0.914894 65.7126 0.588653 66.3934 0.361703C67.0885 0.120568 67.8615 0 68.7126 0C69.4785 0 70.202 0.120568 70.8828 0.361703C71.5637 0.602838 72.1594 0.936171 72.67 1.3617C73.1949 1.78723 73.6062 2.29078 73.9041 2.87234C74.202 3.43972 74.3509 4.06383 74.3509 4.74468H70.9679C70.8261 4.26241 70.5424 3.86525 70.1168 3.55319C69.7055 3.22695 69.2374 3.06383 68.7126 3.06383C68.0743 3.06383 67.5353 3.21986 67.0956 3.53191C66.6559 3.82979 66.436 4.20567 66.436 4.65957C66.436 4.92908 66.5495 5.17021 66.7764 5.38298C67.0176 5.59575 67.3296 5.78723 67.7126 5.95745C68.0956 6.11348 68.5282 6.25532 69.0105 6.38298C69.5069 6.49645 70.0105 6.59575 70.5211 6.68085Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M18.92 4.22578C17.657 4.51301 16.1885 4.84695 16.1885 7.98515C16.1885 12.4879 18.6742 15.9664 23.31 15.9664C27.9458 15.9664 32.602 11.5026 32.602 6.99986C32.602 2.49712 29.0313 0 24.3954 0C21.1901 0 20.9926 1.21862 20.8117 2.33492C20.7309 2.8331 20.6535 3.3109 20.3135 3.65091C19.9796 3.98483 19.4692 4.10089 18.92 4.22578ZM26.7691 11.624C29.0563 10.1338 29.8488 7.29625 28.5391 5.28614C27.2295 3.27603 24.3136 2.85455 22.0264 4.34474C19.7392 5.83493 18.9468 8.67248 20.2564 10.6826C21.5661 12.6927 24.4819 13.1142 26.7691 11.624Z" fill="currentColor"/></svg>`;
+
+  // Header / context icons — uniform 16px stroke set so they all line up.
+  const svgIcon = (inner, size = 16) =>
+    `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+  const ICONS = {
+    gear: svgIcon(
+      `<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>`
+    ),
+    external: svgIcon(
+      `<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>`
+    ),
+    reload: svgIcon(
+      `<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/>`
+    ),
+    close: svgIcon(`<path d="M18 6 6 18"/><path d="m6 6 12 12"/>`),
+    chevron: svgIcon(`<path d="m6 9 6 6 6-6"/>`, 14),
+  };
 
   const SOURCE_LABELS = {
     salesforce: "Salesforce",
@@ -296,8 +318,14 @@
     if (!root) return;
     applyWidth(settings.width);
 
+    // The wordmark is the brand; show a separate title only when the user has
+    // set a custom one (anything other than the default "Noxus").
     const title = root.querySelector(".noxus-title");
-    if (title) title.textContent = settings.title || "Noxus";
+    if (title) {
+      const custom = settings.title && settings.title !== "Noxus";
+      title.textContent = custom ? settings.title : "";
+      title.style.display = custom ? "" : "none";
+    }
 
     const src = buildIframeSrc();
     const iframe = root.querySelector("#noxus-widget-iframe");
@@ -313,7 +341,8 @@
       }
       body.style.display = "";
       empty.style.display = "none";
-      if (contextBar) contextBar.style.display = "";
+      if (contextBar)
+        contextBar.style.display = settings.showPageInfo ? "" : "none";
     } else {
       iframe.removeAttribute("src");
       body.style.display = "none";
@@ -379,18 +408,20 @@
     root.innerHTML = `
       <div id="noxus-widget-resizer"></div>
       <div class="noxus-widget-header">
-        <span class="noxus-logo">${NOXUS_LOGO}</span>
-        <span class="noxus-title">Noxus</span>
-        <button class="noxus-options" title="Options">&#x2699;&#xFE0E;</button>
-        <button class="noxus-external" title="Open in a new tab">&#x2197;</button>
-        <button class="noxus-reload" title="Reload">&#x21bb;</button>
-        <button class="noxus-collapse" title="Collapse">&times;</button>
+        <div class="noxus-brand">
+          <span class="noxus-logo">${NOXUS_WORDMARK}</span>
+          <span class="noxus-title"></span>
+        </div>
+        <button class="noxus-options" data-tip="Options" aria-label="Options">${ICONS.gear}</button>
+        <button class="noxus-external" data-tip="Open in a new tab" aria-label="Open in a new tab">${ICONS.external}</button>
+        <button class="noxus-reload" data-tip="Reload" aria-label="Reload">${ICONS.reload}</button>
+        <button class="noxus-collapse" data-tip="Collapse" aria-label="Collapse">${ICONS.close}</button>
       </div>
       <div class="noxus-context-bar">
         <button class="noxus-context-toggle" type="button" title="Page context the agent sees">
           <span class="noxus-context-source" data-source="generic">Page</span>
           <span class="noxus-context-label"></span>
-          <span class="noxus-context-chevron">&#x2304;</span>
+          <span class="noxus-context-chevron">${ICONS.chevron}</span>
         </button>
         <div class="noxus-context-detail noxus-hidden"></div>
       </div>

@@ -4,6 +4,7 @@ const DEFAULTS = {
   iframeUrl: "",
   width: 400,
   title: "Noxus",
+  showPageInfo: true,
   noxusBaseUrl: "",
   allowedSites: DEFAULT_ALLOWED_SITES,
   workspaceId: "",
@@ -14,6 +15,7 @@ const els = {
   iframeUrl: document.getElementById("iframeUrl"),
   title: document.getElementById("title"),
   width: document.getElementById("width"),
+  showPageInfo: document.getElementById("showPageInfo"),
   noxusBaseUrl: document.getElementById("noxusBaseUrl"),
   allowedSites: document.getElementById("allowedSites"),
   workspace: document.getElementById("workspace"),
@@ -32,6 +34,7 @@ chrome.storage.sync.get(DEFAULTS, (s) => {
   els.iframeUrl.value = s.iframeUrl || "";
   els.title.value = s.title || "Noxus";
   els.width.value = s.width || 400;
+  els.showPageInfo.checked = s.showPageInfo !== false;
   els.noxusBaseUrl.value = s.noxusBaseUrl || "";
   els.allowedSites.value = (
     Array.isArray(s.allowedSites) ? s.allowedSites : DEFAULT_ALLOWED_SITES
@@ -66,6 +69,7 @@ function saveSettings(done) {
       iframeUrl: els.iframeUrl.value.trim(),
       title: els.title.value.trim() || "Noxus",
       width,
+      showPageInfo: els.showPageInfo.checked,
       noxusBaseUrl: els.noxusBaseUrl.value.trim().replace(/\/+$/, ""),
       allowedSites: allowedSites.length ? allowedSites : DEFAULT_ALLOWED_SITES,
       workspaceId: selection.workspaceId,

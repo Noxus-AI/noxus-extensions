@@ -56,6 +56,16 @@
         font-size: 12px;
         margin-top: 4px;
       }
+      label.checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+      label.checkbox-row input {
+        width: auto;
+        margin: 0;
+      }
       button {
         background: #0b0b0c;
         color: #fff;
@@ -228,6 +238,15 @@
     <div class="hint">
       One host pattern per line. Use <code>*.</code> for subdomains (e.g.
       <code>*.salesforce.com</code>). The copilot only loads on these sites.
+    </div>
+
+    <label class="checkbox-row" for="showPageInfo">
+      <input type="checkbox" id="showPageInfo" />
+      <span>Display detailed page information</span>
+    </label>
+    <div class="hint">
+      Shows the page-context bar (e.g. <code>Salesforce · Case</code>) above the
+      chat, so you can see what the agent receives. Turn off to hide it.
     </div>
 
     <label for="title">Panel title</label>
