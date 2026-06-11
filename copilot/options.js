@@ -18,8 +18,6 @@ const els = {
   showPageInfo: document.getElementById("showPageInfo"),
   noxusBaseUrl: document.getElementById("noxusBaseUrl"),
   allowedSites: document.getElementById("allowedSites"),
-  workspace: document.getElementById("workspace"),
-  agent: document.getElementById("agent"),
   pickerHint: document.getElementById("pickerHint"),
   status: document.getElementById("status"),
 };
@@ -110,42 +108,179 @@ function listOf(data) {
   return Array.isArray(data) ? data : (data && data.items) || [];
 }
 
-function fillSelect(sel, opts, selectedId, placeholder) {
-  sel.innerHTML = "";
-  const ph = document.createElement("option");
-  ph.value = "";
-  ph.textContent = placeholder;
-  sel.appendChild(ph);
-  for (const o of opts) {
-    const opt = document.createElement("option");
-    opt.value = o.id;
-    opt.textContent = o.name || o.id;
-    if (o.id === selectedId) opt.selected = true;
-    sel.appendChild(opt);
+async function fetchAllPages(path) {
+  const items = [];
+  let page = 1;
+  for (;;) {
+    const sep = path.includes("?") ? "&" : "?";
+    const data = await apiGet(`${path}${sep}size=100&page=${page}`);
+    items.push(...listOf(data));
+    if (!data || !data.pages || page >= data.pages) return items;
+    page += 1;
   }
 }
 
+// A <select> replacement that scrolls: button + popup list with a filter box.
+function createDropdown(id, { placeholder, onChange }) {
+  const root = document.getElementById(id);
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "dd-btn";
+  btn.disabled = true;
+  const label = document.createElement("span");
+  label.className = "dd-label";
+  btn.appendChild(label);
+  btn.insertAdjacentHTML(
+    "beforeend",
+    '<svg class="dd-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
+  );
+  const panel = document.createElement("div");
+  panel.className = "dd-panel";
+  panel.hidden = true;
+  const search = document.createElement("div");
+  search.className = "dd-search";
+  const filter = document.createElement("input");
+  filter.type = "text";
+  filter.placeholder = "Filter…";
+  search.appendChild(filter);
+  const list = document.createElement("div");
+  list.className = "dd-list";
+  panel.append(search, list);
+  root.append(btn, panel);
+
+  const state = { options: [], value: "", placeholder };
+
+  function renderLabel() {
+    const current = state.options.find((o) => o.id === state.value);
+    label.textContent = current ? current.name : state.placeholder;
+    label.classList.toggle("is-placeholder", !current);
+  }
+
+  function renderList() {
+    const q = filter.value.trim().toLowerCase();
+    list.innerHTML = "";
+    const visible = state.options.filter(
+      (o) => !q || o.name.toLowerCase().includes(q)
+    );
+    if (!visible.length) {
+      const empty = document.createElement("div");
+      empty.className = "dd-empty";
+      empty.textContent = "No matches";
+      list.appendChild(empty);
+      return;
+    }
+    for (const o of visible) {
+      const row = document.createElement("div");
+      row.className = "dd-option" + (o.id === state.value ? " selected" : "");
+      row.textContent = o.name;
+      row.title = o.name;
+      row.addEventListener("click", () => {
+        const changed = state.value !== o.id;
+        state.value = o.id;
+        renderLabel();
+        close();
+        if (changed) onChange(o.id);
+      });
+      list.appendChild(row);
+    }
+  }
+
+  function open() {
+    panel.hidden = false;
+    filter.value = "";
+    renderList();
+    search.hidden = state.options.length <= 8;
+    if (!search.hidden) filter.focus();
+  }
+
+  function close() {
+    panel.hidden = true;
+  }
+
+  btn.addEventListener("click", () => (panel.hidden ? open() : close()));
+  filter.addEventListener("input", renderList);
+  document.addEventListener("click", (e) => {
+    if (!root.contains(e.target)) close();
+  });
+  root.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
+  });
+
+  renderLabel();
+  return {
+    get value() {
+      return state.value;
+    },
+    setOptions(opts, selectedId) {
+      state.options = opts;
+      state.value = opts.some((o) => o.id === selectedId) ? selectedId : "";
+      renderLabel();
+      renderList();
+    },
+    setPlaceholder(text) {
+      state.placeholder = text;
+      renderLabel();
+    },
+    setDisabled(disabled) {
+      btn.disabled = disabled;
+      if (disabled) close();
+    },
+  };
+}
+
+const workspaceDD = createDropdown("workspace", {
+  placeholder: "Sign in to choose…",
+  onChange: (id) => {
+    selection.workspaceId = id;
+    selection.agentId = "";
+    agentDD.setOptions([], "");
+    agentDD.setPlaceholder("Select an agent…");
+    agentDD.setDisabled(true);
+    if (id) loadAgents(id);
+  },
+});
+
+const agentDD = createDropdown("agent", {
+  placeholder: "Select a workspace first…",
+  onChange: (id) => {
+    selection.agentId = id;
+    if (workspaceDD.value && id) selectAgent(workspaceDD.value, id);
+  },
+});
+
+function toOptions(items) {
+  return items
+    .filter((o) => o && o.id)
+    .map((o) => ({ id: o.id, name: o.name || o.id }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 async function loadWorkspaces() {
-  els.workspace.disabled = true;
+  workspaceDD.setDisabled(true);
   els.pickerHint.textContent = "Loading workspaces…";
   try {
-    const groups = listOf(await apiGet("/groups/me?size=100"));
-    fillSelect(els.workspace, groups, selection.workspaceId, "Select a workspace…");
-    els.workspace.disabled = false;
+    // /groups/me wraps each item as { group, users }.
+    const groups = (await fetchAllPages("/groups/me")).map(
+      (it) => (it && it.group) || it
+    );
+    workspaceDD.setPlaceholder("Select a workspace…");
+    workspaceDD.setOptions(toOptions(groups), selection.workspaceId);
+    workspaceDD.setDisabled(false);
     els.pickerHint.textContent = "";
-    if (selection.workspaceId) await loadAgents(selection.workspaceId);
+    if (workspaceDD.value) await loadAgents(workspaceDD.value);
   } catch (e) {
     els.pickerHint.textContent = "Couldn't load workspaces. Try signing in again.";
   }
 }
 
 async function loadAgents(groupId) {
-  els.agent.disabled = true;
+  agentDD.setDisabled(true);
   els.pickerHint.textContent = "Loading agents…";
   try {
-    const agents = listOf(await apiGet(`/groups/${groupId}/assistants?size=100`));
-    fillSelect(els.agent, agents, selection.agentId, "Select an agent…");
-    els.agent.disabled = false;
+    const agents = await fetchAllPages(`/groups/${groupId}/assistants`);
+    agentDD.setPlaceholder("Select an agent…");
+    agentDD.setOptions(toOptions(agents), selection.agentId);
+    agentDD.setDisabled(false);
     els.pickerHint.textContent = "";
   } catch (e) {
     els.pickerHint.textContent = "Couldn't load agents for this workspace.";
@@ -172,21 +307,6 @@ async function selectAgent(groupId, assistantId) {
   }
 }
 
-els.workspace.addEventListener("change", () => {
-  selection.workspaceId = els.workspace.value;
-  selection.agentId = "";
-  fillSelect(els.agent, [], "", "Select an agent…");
-  els.agent.disabled = true;
-  if (els.workspace.value) loadAgents(els.workspace.value);
-});
-
-els.agent.addEventListener("change", () => {
-  selection.agentId = els.agent.value;
-  if (els.workspace.value && els.agent.value) {
-    selectAgent(els.workspace.value, els.agent.value);
-  }
-});
-
 // --- Sign in to Noxus -----------------------------------------------------
 const signinBtn = document.getElementById("signin");
 const signoutBtn = document.getElementById("signout");
@@ -201,10 +321,12 @@ function renderAuth(res) {
   if (authed) {
     loadWorkspaces();
   } else {
-    els.workspace.disabled = true;
-    els.agent.disabled = true;
-    fillSelect(els.workspace, [], "", "Sign in to choose…");
-    fillSelect(els.agent, [], "", "Select a workspace first…");
+    workspaceDD.setOptions([], "");
+    workspaceDD.setPlaceholder("Sign in to choose…");
+    workspaceDD.setDisabled(true);
+    agentDD.setOptions([], "");
+    agentDD.setPlaceholder("Select a workspace first…");
+    agentDD.setDisabled(true);
     els.pickerHint.textContent = "Sign in to choose a workspace and agent.";
   }
 }
